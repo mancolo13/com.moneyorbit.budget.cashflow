@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
-import '../../services/routing_service.dart';
 
 class Tab3Screen extends StatefulWidget {
   const Tab3Screen({super.key});
@@ -10,116 +9,87 @@ class Tab3Screen extends StatefulWidget {
 }
 
 class _Tab3ScreenState extends State<Tab3Screen> {
-  int _counter = 65;
-  bool _active = true;
+  String _filter = 'All';
+
+  final List<Map<String, dynamic>> _txs = [
+    {'title': 'Received Bitcoin', 'hash': '0x8f2...4a9c', 'amt': '+0.05 BTC', 'time': '12 mins ago', 'status': 'Confirmed', 'type': 'In'},
+    {'title': 'Uniswap V3 Swap', 'hash': '0x3c1...8b2e', 'amt': '-1.2 ETH', 'time': '2 hours ago', 'status': 'Confirmed', 'type': 'Swap'},
+    {'title': 'Sent Solana', 'hash': '0x7e4...91df', 'amt': '-4.0 SOL', 'time': 'Yesterday', 'status': 'Confirmed', 'type': 'Out'},
+    {'title': 'Bridge to Arbitrum', 'hash': '0x1a8...55c0', 'amt': '500 USDC', 'time': '3 days ago', 'status': 'Confirmed', 'type': 'Bridge'},
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('MoneyOrbit • Growth', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text('Activity • On-Chain History', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: AppTheme.surface,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.stars_rounded, color: AppTheme.primary),
-            tooltip: 'Special Registration Offer',
-            onPressed: () => RoutingService.openRegistrationUrl(),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              padding: const EdgeInsets.all(20),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: ['All', 'Received', 'Sent', 'Swaps'].map((f) => Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(f),
+                    selected: _filter == f,
+                    selectedColor: AppTheme.primary.withValues(alpha: 0.3),
+                    onSelected: (val) => setState(() => _filter = f),
+                  ),
+                )).toList(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ..._txs.map((tx) => Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppTheme.card,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.35)),
+                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.15)),
               ),
-              child: Column(
+              child: Row(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Growth Dashboard',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-                      ),
-                      Icon(Icons.pie_chart, color: AppTheme.primary, size: 28),
-                    ],
+                  CircleAvatar(
+                    backgroundColor: AppTheme.surface,
+                    child: Icon(
+                      tx['type'] == 'In' ? Icons.call_received : (tx['type'] == 'Out' ? Icons.call_made : Icons.swap_horiz),
+                      color: tx['type'] == 'In' ? AppTheme.secondary : AppTheme.primary,
+                      size: 20,
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '18.2%',
-                    style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: AppTheme.primary),
-                  ),
-                  const Text('Savings Ratio', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () => setState(() => _counter += 5),
-                        icon: const Icon(Icons.bolt),
-                        label: Text('Adjust Vault (\$_counter)'),
-                        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, foregroundColor: Colors.black),
-                      ),
-                      const SizedBox(width: 12),
-                      OutlinedButton.icon(
-                        onPressed: () => setState(() => _active = !_active),
-                        icon: Icon(_active ? Icons.check_circle : Icons.pause),
-                        label: Text(_active ? 'Active' : 'Paused'),
-                        style: OutlinedButton.styleFrom(foregroundColor: AppTheme.primary),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              color: AppTheme.surface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: AppTheme.primary.withValues(alpha: 0.2),
-                  child: const Icon(Icons.emoji_events, color: AppTheme.primary),
-                ),
-                title: const Text('Exclusive Registration Offer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                subtitle: const Text('Access exclusive features and personalized rewards', style: TextStyle(fontSize: 12)),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.primary),
-                onTap: () => RoutingService.openRegistrationUrl(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.surface,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Activity Stream & Log', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 12),
-                  for (int i = 1; i <= 3; i++) ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('MoneyOrbit Log #$i', style: const TextStyle(color: AppTheme.textSecondary)),
-                        Text('Synced ${i * 10}m ago', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                        Text(tx['title'] as String, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                        const SizedBox(height: 4),
+                        Text('Hash: ${tx['hash']} • ${tx['time']}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
                       ],
                     ),
-                    if (i < 3) const Divider(height: 16, color: Colors.white12),
-                  ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(tx['amt'] as String, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14)),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(6)),
+                        child: Text(tx['status'] as String, style: const TextStyle(color: Colors.greenAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            ),
+            )),
           ],
         ),
       ),
